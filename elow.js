@@ -61,8 +61,7 @@ Elow.prototype = {
     },
 
     _finish: function(){
-        console.log(this.result);
-        this.endCallback();
+        this.endCallback(this.result);
         
         return this;
     },
