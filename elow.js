@@ -22,6 +22,8 @@ Elow.prototype = {
             case 'parallel':
                 this._parallel(this.tasks);
                 break;
+            case 'waterfall':
+                this._waterfall(this.tasks.shift());
         }
     },
 
@@ -51,10 +53,10 @@ Elow.prototype = {
         return this;
     },
 
-    _async: function(task){
+    _async: function(task, data){
         var delay = Math.floor(Math.random() * 5) * 100;
         setTimeout(function(){
-            task();
+            task(data);
         }, delay);
 
         return this;
@@ -110,5 +112,21 @@ Elow.prototype = {
         }
 
         return this;
+    },
+
+    _waterfall: function(task, data) {
+        if (task) {
+            this._on('Task::' + this.index, function(res){
+                this.result.push(res);
+                this._off('Task::' + this.index);
+                this._waterfall(this.tasks.shift(), res);
+            }.bind(this));
+
+            this._async(task, data);
+            this.index += 1;
+        }
+        else {
+            this._finish();
+        }
     }
 };
