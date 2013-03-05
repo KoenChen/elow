@@ -62,6 +62,7 @@ Elow.prototype = {
 
     _async: function(task, data){
         var delay = Math.floor(Math.random() * 5) * 100;
+        
         setTimeout(function(){
             task(data);
         }, delay);
@@ -95,9 +96,10 @@ Elow.prototype = {
 
     _parallel: function(){
         if (this.tasks.length !== 0) {
-            var self = this;
-            var count = 0;
-            this.tasks.forEach(function(task, index){
+            var self = this,
+                count = 0;
+            
+            this.tasks.forEach(function(task){
                 (function(i){
                     self._on('Task::' + self.number, function(res){
                         self.result[i-1] = res;
@@ -141,19 +143,18 @@ Elow.prototype = {
 
     _queue: function(){
         if (this.tasks.length !== 0) {
-            var temp = this.tasks.slice(0);
-            var workers = temp.splice(0, this.workerLimit);
-            var self = this;
-            var count = 0;
-            var loop = 0;
-
-            
+            var self = this,
+                count = 0,
+                temp = this.tasks.slice(0),
+                workers = temp.splice(0, this.workerLimit);
+           
             function _process(tasks) {
-                tasks.forEach(function(task, index){
+                tasks.forEach(function(task){
                     (function(i){
                         self._on('Task::' + self.number, function(res){
                             self.result[i-1] = res;
                             self._off('Task::' + self.number);
+                            
                             count += 1;
                             if (count >= self.tasks.length) {
                                 self._finish();
@@ -164,7 +165,6 @@ Elow.prototype = {
                     self._async(task);
                     self.number += 1;
                 });
-                loop += tasks.length;
 
                 if (temp.length != 0) {
                     _process([temp.shift()]);
